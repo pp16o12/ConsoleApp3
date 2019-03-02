@@ -34,6 +34,8 @@ namespace ConsoleApp3
 
         private static async void getQueryMess(object sender, CallbackQueryEventArgs e)
         {
+            await deleteLastMsg(e.CallbackQuery.Message.Chat, e.CallbackQuery.Message.MessageId);
+
             switch (e.CallbackQuery.Data.ToLower())
             {
                 case "/taverna":
@@ -44,14 +46,13 @@ namespace ConsoleApp3
                         btns.Add(new InlineKeyboardButton() { CallbackData = "/home", Text = "В город" });
                         btns.Add(new InlineKeyboardButton() { CallbackData = "/buhat", Text = "Напиться в стельку"});
 
-                  
                         var klava = new InlineKeyboardMarkup(btns);
                         await botClient.SendPhotoAsync(e.CallbackQuery.Message.Chat.Id, "https://images.stopgame.ru/uploads/images/222710/form/normal_1301827588.jpg", "бу-га-га!", replyMarkup: klava);
                         break;
                     }
                 case "/buhat":
                     {
-                   
+                      
                         await botClient.SendPhotoAsync(e.CallbackQuery.Message.Chat.Id, "http://www.gamer.ru/system/attached_images/images/000/641/329/original/63241677.jpg", "бу-га-га!");
                         break;
                     }
@@ -60,17 +61,32 @@ namespace ConsoleApp3
 
         private static async Task getMainGamePage(Message userMsg)
         {
-       
+            await deleteLastMsg(userMsg.Chat, userMsg.MessageId);
+
             InlineKeyboardButton b = new InlineKeyboardButton();
             b.Text = "В таверну";
             b.CallbackData = "/taverna";
 
             var klava = new InlineKeyboardMarkup(b);
-            await botClient.SendTextMessageAsync(userMsg.Chat.Id, "-", replyMarkup: klava);
+            await botClient.SendPhotoAsync(userMsg.Chat.Id, "http://klan-voin.at.ua/Kartinki/cs1x1ak6.jpg", $"Добро пожаловать в таверну!", replyMarkup: klava);
           
         }
 
-     
+        private static async Task deleteLastMsg(Chat chatId, int msgId)
+        {
+            try
+            {
+                await botClient.DeleteMessageAsync(chatId, msgId);
+            }
+            catch (ApiRequestException e)
+            {
+                Console.WriteLine("удалил не то");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("удалил  то");
+            }
+        }
 
         private static async void getMessage(object sender, MessageEventArgs e)
         {
@@ -78,7 +94,6 @@ namespace ConsoleApp3
             {
                 case "/start":
                     {
-                        await botClient.SendPhotoAsync(e.Message.Chat.Id, "http://klan-voin.at.ua/Kartinki/cs1x1ak6.jpg", $"Добро пожаловать, в мою игру!");
                         await getMainGamePage(e.Message);
                         break;
                     }
